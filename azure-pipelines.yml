@@ -3,7 +3,7 @@ trigger:
 
 variables:
   azureSubscription: '8935920_service_connection'
-  functionAppName: 'python-fasttrack-123'
+  functionAppName: '8935920'
   pythonVersion: '3.9'
 
 stages:
