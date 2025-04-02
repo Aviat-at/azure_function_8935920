@@ -2,8 +2,8 @@ trigger:
 - main
 
 variables:
-  azureSubscription: '8935920_service_connection'  
-  functionAppName: '8935920'                      
+  azureSubscription: '8935920_service_connection'  # Replace with your actual service connection name
+  functionAppName: '8935920'                       # Replace with your actual Azure Function App name
   pythonVersion: '3.9'
 
 stages:
