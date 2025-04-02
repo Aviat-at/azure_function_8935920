@@ -2,19 +2,20 @@ trigger:
 - main
 
 variables:
-  azureSubscription: '8935920_service_connection'  # Replace with your actual service connection name
-  functionAppName: '8935920'                       # Replace with your actual Azure Function App name
+  azureSubscription: '8935920_service_connection'  
+  functionAppName: '8935920'                       
+  resourceGroup: '8935920_function'             
   pythonVersion: '3.9'
 
 stages:
 - stage: Build
   jobs:
   - job: Build
-    pool: 
+    pool:
       vmImage: 'ubuntu-latest'
     steps:
     - task: UsePythonVersion@0
-      inputs: 
+      inputs:
         versionSpec: '$(pythonVersion)'
 
     - script: |
@@ -30,16 +31,26 @@ stages:
   dependsOn: Build
   jobs:
   - job: Deploy
-    pool: 
+    pool:
       vmImage: 'ubuntu-latest'
     steps:
     - download: current
       artifact: drop
 
-    - task: AzureFunctionApp@1
+    - task: AzureCLI@2
       inputs:
         azureSubscription: '$(azureSubscription)'
-        appType: 'functionAppLinux'
-        appName: '$(functionAppName)'
-        package: '$(Pipeline.Workspace)/drop/functionapp.zip'
-        deploymentMethod: 'runFromPackage'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          echo "Setting WEBSITE_RUN_FROM_PACKAGE=1"
+          az functionapp config appsettings set \
+            --name $(functionAppName) \
+            --resource-group $(resourceGroup) \
+            --settings WEBSITE_RUN_FROM_PACKAGE=1
+
+          echo "Deploying package using az functionapp deployment source config-zip"
+          az functionapp deployment source config-zip \
+            --name $(functionAppName) \
+            --resource-group $(resourceGroup) \
+            --src "$(Pipeline.Workspace)/drop/functionapp.zip"
