@@ -2,7 +2,7 @@ trigger:
 - main
 
 variables:
-  azureSubscription: 'azure-function-connection'
+  azureSubscription: '8935920_service_connection'
   functionAppName: 'python-fasttrack-123'
   pythonVersion: '3.9'
 
