@@ -2,8 +2,8 @@ trigger:
 - main
 
 variables:
-  azureSubscription: '8935920_service_connection'
-  functionAppName: '8935920'
+  azureSubscription: '8935920_service_connection'  
+  functionAppName: '8935920'                      
   pythonVersion: '3.9'
 
 stages:
@@ -16,12 +16,13 @@ stages:
     - task: UsePythonVersion@0
       inputs: 
         versionSpec: '$(pythonVersion)'
-    
+
     - script: |
+        python -m pip install --upgrade pip
         pip install -r requirements.txt
         zip -r functionapp.zip .
-      displayName: 'Build package'
-    
+      displayName: 'Build Python package'
+
     - publish: 'functionapp.zip'
       artifact: drop
 
@@ -34,10 +35,11 @@ stages:
     steps:
     - download: current
       artifact: drop
-    
+
     - task: AzureFunctionApp@1
       inputs:
         azureSubscription: '$(azureSubscription)'
         appType: 'functionAppLinux'
         appName: '$(functionAppName)'
         package: '$(Pipeline.Workspace)/drop/functionapp.zip'
+        deploymentMethod: 'runFromPackage'
