@@ -1,0 +1,37 @@
+trigger:
+- main
+
+variables:
+  azureSubscription: 'azure-function-connection'  # Must match service connection name
+  functionAppName: 'python-fasttrack-123'        # Must match Azure Portal
+  pythonVersion: '3.9'
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    pool: vmImage: 'ubuntu-latest'
+    steps:
+    - task: UsePythonVersion@0
+      inputs: versionSpec: '$(pythonVersion)'
+    - script: |
+        pip install -r requirements.txt
+        zip -r functionapp.zip .
+      displayName: 'Build package'
+    - publish: 'functionapp.zip'
+      artifact: drop
+
+- stage: Deploy
+  dependsOn: Build
+  jobs:
+  - job: Deploy
+    pool: vmImage: 'ubuntu-latest'
+    steps:
+    - download: current
+      artifact: drop
+    - task: AzureFunctionApp@1
+      inputs:
+        azureSubscription: '$(azureSubscription)'
+        appType: 'functionAppLinux'
+        appName: '$(functionAppName)'
+        package: '$(Pipeline.Workspace)/drop/functionapp.zip'
